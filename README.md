@@ -5,7 +5,6 @@ Author: Marc Staehli, initial upload Nov 2020
 
 [![ESP8266-World-Clock](https://github.com/3KUdelta/ESP8266-World-Clock/blob/main/pics/IMG_20201108_143037.jpg)](https://github.com/3KUdelta/ESP8266-World-Clock)
 
-see the video: https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/IMG_3175.mp4
 
 Build:
 - WEMOS D1 mini (ESP8266) - using WiFi to get NTP Time
@@ -16,10 +15,8 @@ Build:
 
 Print the boxes yourself: (link to thingiverse)
 
-[![LED matrix MQTT monitor](https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/LED_parola_MQTT_monitor.png)](https://github.com/3KUdelta/MDparola_MQTT_monitor)
+[![ESP8266-World-Clock](https://github.com/3KUdelta/ESP8266-World-Clock/blob/main/pics/WorldClock_scematic.png)](https://github.com/3KUdelta/ESP8266-World-Clock)
 
-[![LED matrix MQTT monitor](https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/IMG_3172.JPG)](https://github.com/3KUdelta/MDparola_MQTT_monitor)
+[![ESP8266-World-Clock](https://github.com/3KUdelta/ESP8266-World-Clock/blob/main/pics/IMG_20201108_141833.jpg)](https://github.com/3KUdelta/ESP8266-World-Clock)
 
-[![LED matrix MQTT monitor](https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/IMG_3176.JPG)](https://github.com/3KUdelta/MDparola_MQTT_monitor)
-
-[![LED matrix MQTT monitor](https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/IMG_3177.JPG)](https://github.com/3KUdelta/MDparola_MQTT_monitor)
+[![ESP8266-World-Clock](https://github.com/3KUdelta/ESP8266-World-Clock/blob/main/pics/IMG_20201108_141814.jpg)](https://github.com/3KUdelta/ESP8266-World-Clock)
