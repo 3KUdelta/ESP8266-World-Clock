@@ -3,7 +3,7 @@ Highly accurate world clock with automatic daylight saving time adjustments
 
 Author: Marc Staehli, initial upload Nov 2020
 
-[![LED matrix MQTT monitor](https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/IMG_3180.JPG)](https://github.com/3KUdelta/MDparola_MQTT_monitor)
+[![ESP8266-World-Clock](https://github.com/3KUdelta/ESP8266-World-Clock/blob/main/pics/IMG_20201108_143037.jpg)](https://github.com/3KUdelta/ESP8266-World-Clock)
 
 see the video: https://github.com/3KUdelta/MDparola_MQTT_monitor/blob/master/pictures/IMG_3175.mp4
 
