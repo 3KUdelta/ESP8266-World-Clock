@@ -13,6 +13,9 @@ Build:
 - 1 Radar sensor (RCWL-0516) for switching on for 2 minutes when there is movement
 - LDR sensor for adjusting bightness of LEDs
 
+Settings.h includes all individal settings. 
+Including <Timezone.h> for calculating the right timezone including global DST settings (https://github.com/JChristensen/Timezone).
+
 Print the boxe yourself: (link to thingiverse)
 
 [![ESP8266-World-Clock](https://github.com/3KUdelta/ESP8266-World-Clock/blob/main/pics/WorldClock_scematic.png)](https://github.com/3KUdelta/ESP8266-World-Clock)
