@@ -1,5 +1,5 @@
 # ESP8266-World-Clock
-Highly accurate world clock with automatic daylight saving time adjustments
+Highly accurate world clock with automatic global daylight saving time settings.
 
 Author: Marc Staehli, initial upload Nov 2020
 
