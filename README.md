@@ -9,8 +9,8 @@ Author: Marc Staehli, initial upload Nov 2020
 Build:
 - WEMOS D1 mini (ESP8266) - using WiFi to get NTP Time
 - 4 4-digit,7-segment LED display for showing 4 individual time zones
-- 1 RTC 3231 unit for keeping the accurate time when there is no WIFI available
-- 1 Radar sensor (RCWL-0516) for switching on for 2 minutes when there is movement
+- 1 RTC 3231 unit for keeping the accurate time if there is no WIFI available
+- 1 Radar sensor (RCWL-0516) for switching on for 2 minutes if there is movement in the room (hidden sensor)
 - LDR sensor for adjusting bightness of LEDs
 
 Settings.h includes all individal settings. 
