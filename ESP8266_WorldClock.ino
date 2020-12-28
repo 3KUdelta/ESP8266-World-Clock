@@ -1,5 +1,25 @@
 
-#include "Settings.h"                       // Don't forget to set your settings!
+/*----------------------------------------------------------------------------------------------------
+  Project Name : World Clock on an ESP8266
+  Features: Accurate time taken from NTP servers, automatically adjusted timezones and daylight saving times, 
+  display switch off after 2 minutes if no movement, automatic brightness adjustment, RTC support if no WiFi available
+  Author: Marc Stähli / Dec 2020
+  
+  Hardware Settings Mac: 
+  LOLIN(WEMOS) D1 mini, standard settings
+  
+  updated 28.12.20
+  - fixed the bug if there is no WiFi
+  - go_online() calls also get_NTP_time() --> leaving go_online() as the main function for updates
+
+/***************************************************
+ * VERY IMPORTANT:                                 *
+ *                                                 *
+ * Enter your personal settings in Settings.h !    *
+ *                                                 *
+ **************************************************/
+
+#include "Settings.h"
 
 #include <Arduino.h>
 #include <TM1637Display.h>                  // https://github.com/avishorp/TM1637
@@ -86,7 +106,7 @@ void setup() {
 
   Wire.begin(4, 5);                                 // ensuring read from SLA,SLC ports 4 and 5 on ESP8266
 
-  // initialize all the readings to 0: for smoothening
+  // initialize all the readings to 0  --> needed to smoothen analog read to avoid brightness flickering
   for (int thisReading = 0; thisReading < numReadings; thisReading++) {
     readings[thisReading] = 0;
   }
@@ -120,11 +140,10 @@ void setup() {
     london.clear();
   }
 
-  go_online();                            // go online
-  get_NTP_time();                         // get time from NTP time server
-
   now_3231 = rtc_3231.now();              // reading time from 3231 RTC
   setTime(now_3231.unixtime());           // no WiFi? That's why we always take the time from 3231
+
+  go_online();                            // go online and try to get NTP time
 
   timestamp = now();                      // initialize timestamp
 
@@ -194,7 +213,7 @@ void loop() {
     delay(500);
 
     if ((now() - timestamp) > NTPUPDATE) {
-      get_NTP_time();                            // get all x hours a time update from NTP Server --> avoiding a constant read from time server
+      go_online();                               // get all x hours (NTPUPDATE in Settings.h) a time update from NTP Server --> avoiding a constant read from time server
       timestamp = now();                         // reset timestamp
     }
   }
@@ -239,16 +258,13 @@ void go_online() {
   london.clear();
   singapore.clear();
   sydney.clear();
+  get_NTP_time();
 }
 
 void get_NTP_time() {
 
   Serial.println("---> Now reading time from NTP Server");
-
-  if (WiFi.status() != WL_CONNECTED) {
-    go_online();
-  }
-
+  
   int inc = 0;
   while (!ntpClient.getUnixTime()) {
     delay(100);
