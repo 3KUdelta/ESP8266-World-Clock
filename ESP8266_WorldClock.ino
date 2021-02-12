@@ -1,21 +1,24 @@
 
 /*----------------------------------------------------------------------------------------------------
   Project Name : World Clock on an ESP8266
-  Features: Accurate time taken from NTP servers, automatically adjusted timezones and daylight saving times, 
+  Features: Accurate time taken from NTP servers, automatically adjusted timezones and daylight saving times,
   display switch off after 2 minutes if no movement, automatic brightness adjustment, RTC support if no WiFi available
   Author: Marc Stähli / Dec 2020
-  
-  Hardware Settings Mac: 
+
+  Hardware Settings Mac:
   LOLIN(WEMOS) D1 mini, standard settings
-  
+
   updated 28.12.20
   - fixed the bug if there is no WiFi
   - go_online() calls also get_NTP_time() --> leaving go_online() as the main function for updates
 
-/***************************************************
- * VERY IMPORTANT:                                 *
+  updated 12. 02.21
+  - sometimes call to NTP returns wrong values --> algorithm added to remain on RTC values
+
+  /***************************************************
+   VERY IMPORTANT:
  *                                                 *
- * Enter your personal settings in Settings.h !    *
+   Enter your personal settings in Settings.h !
  *                                                 *
  **************************************************/
 
@@ -34,7 +37,7 @@ unsigned int LDR_Pin = A0;                  // Data pin for light sensor
 
 DateTime now_3231;                          // RTC variable
 time_t SYD_time, ZRH_time, LON_time, SIN_time;
-unsigned long timestamp, epochtime_3231, timebuffer;
+unsigned long timestamp, epochtime_3231, epochtime_ntp, timebuffer;
 unsigned int raw_LDR;
 unsigned int brightness = 1;
 unsigned int counter = 0;
@@ -141,7 +144,8 @@ void setup() {
   }
 
   now_3231 = rtc_3231.now();              // reading time from 3231 RTC
-  setTime(now_3231.unixtime());           // no WiFi? That's why we always take the time from 3231
+  epochtime_3231 = now_3231.unixtime();   // storing RTC time in variable epochtime_3231
+  setTime(epochtime_3231);                // in case of no WiFi we initialize the ESP8266 rtc with the values from 3231
 
   go_online();                            // go online and try to get NTP time
 
@@ -264,7 +268,7 @@ void go_online() {
 void get_NTP_time() {
 
   Serial.println("---> Now reading time from NTP Server");
-  
+
   int inc = 0;
   while (!ntpClient.getUnixTime()) {
     delay(100);
@@ -287,6 +291,26 @@ void get_NTP_time() {
     singapore.setSegments(SEG_NTP, 3, 0);
     Serial.print(".");
   }
-  setTime(ntpClient.getUnixTime());                // get UNIX timestamp (seconds from 1.1.1970) and set systemtime in ESP8266 to UTC
-  rtc_3231.adjust(DateTime(year(now()), month(now()), day(now()), hour(now()), minute(now()), second(now()))); // set UTC to 3231 RTC
+  epochtime_ntp = ntpClient.getUnixTime(); //get UNIX timestamp (seconds from 1.1.1970)
+ 
+  /* sometimes there are reading errors from NTP, 
+     time is only updated if within a difference of 30 seconds, 
+     else stored time in RTC3231 shall remain */
+  if (timedifference(epochtime_3231, epochtime_ntp) < 30) {  
+    setTime(epochtime_ntp);                  // set systemtime in ESP8266 to UTC
+    rtc_3231.adjust(DateTime(year(now()), month(now()), day(now()), hour(now()), minute(now()), second(now()))); // set UTC to 3231 RTC
+  }
+
 } // end get_NTP_time()
+
+int timedifference(time_t timeone, time_t timetwo) {
+  int t_diff = 0;
+  if (timeone > timetwo) {
+    t_diff = timeone - timetwo;
+    return t_diff;
+  }
+  if (timeone < timetwo) {
+    t_diff = timetwo - timeone;
+    return t_diff;
+  }
+} // end timedifference()
