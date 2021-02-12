@@ -103,8 +103,7 @@ RTC_DS3231 rtc_3231;                               // ds3231 RTC initialization
 
 void setup() {
 
-  Serial.begin(115200);
-  delay(1000); //boot recovery
+  Serial.begin(115200); while (!Serial); delay(200);
   Serial.printf("Starting WorldClock...\r\n");
 
   Wire.begin(4, 5);                                 // ensuring read from SLA,SLC ports 4 and 5 on ESP8266
