@@ -8,19 +8,24 @@
   Hardware Settings Mac:
   LOLIN(WEMOS) D1 mini, standard settings
 
-  updated 28.12.20
-  - fixed the bug if there is no WiFi
-  - go_online() calls also get_NTP_time() --> leaving go_online() as the main function for updates
-
-  updated 12. 02.21
-  - sometimes call to NTP returns wrong values --> algorithm added to remain on RTC values
-
-  /***************************************************
+ /***************************************************
    VERY IMPORTANT:
  *                                                 *
    Enter your personal settings in Settings.h !
  *                                                 *
- **************************************************/
+ *************************************************
+
+  updated 28.12.20
+  - fixed the bug if there is no WiFi
+  - go_online() calls also get_NTP_time() --> leaving go_online() as the main function for updates
+
+  updated 12.02.21
+  - sometimes call to NTP returns wrong values --> algorithm added to remain on RTC values
+
+  updated 04.03.21
+  - reversed fix of 12.02.21 / changed to following logic - if time diff between rtc and ntp then always correct with ntp time
+
+*/
 
 #include "Settings.h"
 
@@ -37,7 +42,7 @@ unsigned int LDR_Pin = A0;                  // Data pin for light sensor
 
 DateTime now_3231;                          // RTC variable
 time_t SYD_time, ZRH_time, LON_time, SIN_time;
-unsigned long timestamp, epochtime_3231, epochtime_ntp, timebuffer;
+unsigned long timestamp, epochtime_ntp, timebuffer;
 unsigned int raw_LDR;
 unsigned int brightness = 1;
 unsigned int counter = 0;
@@ -104,6 +109,7 @@ RTC_DS3231 rtc_3231;                               // ds3231 RTC initialization
 void setup() {
 
   Serial.begin(115200); while (!Serial); delay(200);
+  Serial.println();
   Serial.printf("Starting WorldClock...\r\n");
 
   Wire.begin(4, 5);                                 // ensuring read from SLA,SLC ports 4 and 5 on ESP8266
@@ -142,9 +148,7 @@ void setup() {
     london.clear();
   }
 
-  now_3231 = rtc_3231.now();              // reading time from 3231 RTC
-  epochtime_3231 = now_3231.unixtime();   // storing RTC time in variable epochtime_3231
-  setTime(epochtime_3231);                // in case of no WiFi we initialize the ESP8266 rtc with the values from 3231
+  setTime(rtc_3231.now().unixtime());     // in case of no WiFi we initialize the ESP8266 rtc with the values from 3231
 
   go_online();                            // go online and try to get NTP time
 
@@ -157,12 +161,9 @@ void loop() {
 
   if (digitalRead(RADARSENSOR) == 1) {                   // Radarsensor activated --> timer gets started
     timebuffer = millis();
-    //Serial.println("Sensor active");
   }
 
   if (millis() - timebuffer < 120000) {                  // After movement, display remains on for 2 minutes = 120000 ms
-
-    //Serial.println("Timebuffer active");
 
     total = total - readings[readIndex];
     readings[readIndex] = analogRead(LDR_Pin);
@@ -268,6 +269,8 @@ void get_NTP_time() {
 
   Serial.println("---> Now reading time from NTP Server");
 
+  if (WiFi.status() != WL_CONNECTED) go_online();
+
   int inc = 0;
   while (!ntpClient.getUnixTime()) {
     delay(100);
@@ -290,26 +293,25 @@ void get_NTP_time() {
     singapore.setSegments(SEG_NTP, 3, 0);
     Serial.print(".");
   }
-  epochtime_ntp = ntpClient.getUnixTime(); //get UNIX timestamp (seconds from 1.1.1970)
- 
-  /* sometimes there are reading errors from NTP, 
-     time is only updated if within a difference of 30 seconds, 
-     else stored time in RTC3231 shall remain */
-  if (timedifference(epochtime_3231, epochtime_ntp) < 30) {  
-    setTime(epochtime_ntp);                  // set systemtime in ESP8266 to UTC
-    rtc_3231.adjust(DateTime(year(now()), month(now()), day(now()), hour(now()), minute(now()), second(now()))); // set UTC to 3231 RTC
-  }
 
+  epochtime_ntp = ntpClient.getUnixTime(); //get UNIX timestamp (seconds from 1.1.1970)
+
+  if (timedifference(rtc_3231.now().unixtime(), epochtime_ntp) != 0) {   // correct time in rtc_3231 if there is a time difference
+    setTime(epochtime_ntp);                  // set systemtime in ESP8266 to UTC
+    Serial.println("UTC set to processor");
+    rtc_3231.adjust(DateTime(year(now()), month(now()), day(now()), hour(now()), minute(now()), second(now()))); // set UTC to 3231 RTC
+    Serial.println("UTC set to RTC success");
+    delay(500);
+  }
 } // end get_NTP_time()
 
 int timedifference(time_t timeone, time_t timetwo) {
   int t_diff = 0;
   if (timeone > timetwo) {
     t_diff = timeone - timetwo;
-    return t_diff;
   }
   if (timeone < timetwo) {
     t_diff = timetwo - timeone;
-    return t_diff;
   }
+  return t_diff;
 } // end timedifference()
