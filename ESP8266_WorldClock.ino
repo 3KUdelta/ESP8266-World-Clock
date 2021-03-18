@@ -8,7 +8,7 @@
   Hardware Settings Mac:
   LOLIN(WEMOS) D1 mini, standard settings
 
- /***************************************************
+  /***************************************************
    VERY IMPORTANT:
  *                                                 *
    Enter your personal settings in Settings.h !
@@ -24,6 +24,9 @@
 
   updated 04.03.21
   - reversed fix of 12.02.21 / changed to following logic - if time diff between rtc and ntp then always correct with ntp time
+  
+  updated 18.03.21
+  - bugfix: time was only updated when awake, chaged to always update time with the given periode in Settings.h
 
 */
 
@@ -216,10 +219,6 @@ void loop() {
 
     delay(500);
 
-    if ((now() - timestamp) > NTPUPDATE) {
-      go_online();                               // get all x hours (NTPUPDATE in Settings.h) a time update from NTP Server --> avoiding a constant read from time server
-      timestamp = now();                         // reset timestamp
-    }
   }
   else {
     Serial.println("Display alloff");
@@ -227,6 +226,11 @@ void loop() {
     london.setSegments(alloff, 4, 0);             // if no movement on Radarsensor, display shut alloff
     singapore.setSegments(alloff, 4, 0);          // if no movement on Radarsensor, display shut alloff
     sydney.setSegments(alloff, 4, 0);             // if no movement on Radarsensor, display shut alloff
+  }
+  
+  if ((now() - timestamp) > NTPUPDATE) {
+    go_online();                               // get all x hours (NTPUPDATE in Settings.h) a time update from NTP Server --> avoiding a constant read from time server
+    timestamp = now();                         // reset timestamp
   }
 }
 
